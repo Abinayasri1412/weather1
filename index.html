@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Weather App</title>
+</head>
+<body>
+    <center><h1>Weather App 🌤️</h1>
+
+    <!-- Search form -->
+    <form method="POST">
+        <input type="text" name="city" placeholder="Enter city / zip / landmark">
+        <button type="submit">Get Weather</button>
+    </form>
+
+    <!-- GPS Button -->
+    <button onclick="getLocation()">Use My Current Location 📍</button>
+
+    <!-- Hidden form for GPS -->
+    <form id="locationForm" method="POST" style="display:none;">
+        <input type="hidden" name="lat" id="lat">
+        <input type="hidden" name="lon" id="lon">
+    </form>
+
+    <script>
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(showPosition);
+            } else {
+                alert("Geolocation is not supported by this browser.");
+            }
+        }
+
+        function showPosition(position) {
+            document.getElementById("lat").value = position.coords.latitude;
+            document.getElementById("lon").value = position.coords.longitude;
+            document.getElementById("locationForm").submit();
+        }
+    </script>
+
+    {% if weather %}
+        <h2>Current Weather in {{ weather.name }}</h2>
+        <p>Temperature: {{ weather.main.temp }}°C</p>
+        <p>Condition: {{ weather.weather[0].description }}</p>
+        <img src="http://openweathermap.org/img/wn/{{ weather.weather[0].icon }}@2x.png"></center>
+        <center>
+        <!-- 5days detail in table -->
+        <h2>5-Day Forecast</h2>
+        <table border="1" cellpadding="8">
+            <tr>
+                <th>Date</th>
+                <th>Temp (°C)</th>
+                <th>Condition</th>
+                <th>Icon</th>
+            </tr>
+            {% set shown_dates = [] %}
+            {% for f in forecast.list %}
+            {% if "12:00:00" in f.dt_txt and f.dt_txt.split(" ")[0] not in shown_dates %}
+            {% set _ = shown_dates.append(f.dt_txt.split(" ")[0]) %}
+            <tr>
+                <td>{{ f.dt_txt.split(" ")[0] }}</td>
+                <td>{{ f.main.temp }}</td>
+                <td>{{ f.weather[0].description }}</td>
+                <td>
+                    <img src="http://openweathermap.org/img/wn/{{ f.weather[0].icon }}@2x.png"
+                         alt="weather icon">
+                </td>
+            </tr>
+        {% endif %}
+    {% endfor %}
+        </table></center>
+{% endif %}
+<!-- Footer -->
+<center>
+<footer style="text-align:center; margin-top:50px;">
+    Made by <span style="color:#d2691e; font-weight:bold;">Abinaya Sri M</span>
+    <br><br>
+    <button id="infoBtn">Info</button>
+</footer>
+
+<script>
+document.getElementById("infoBtn").addEventListener("click", function() {
+    window.location.href = "/info";  // Flask route, not file path
+});
+</script>
+</center>
+
+</body>
+</html>
